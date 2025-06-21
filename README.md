@@ -2,7 +2,7 @@
 
 Um protótipo funcional inicial para demonstrar a viabilidade de um sistema de previsão de crises sensoriais em indivíduos no espectro autista, utilizando Machine Learning e uma arquitetura preparada para IoT.
 
-**Status do Projeto:** Protótipo Inicial Concluído ✅ (Junho de 2025)
+**Status do Projeto:** Protótipo Inicial Concluído  (Junho de 2025)
 
 ---
 
