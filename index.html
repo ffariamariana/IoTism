@@ -4,44 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel IoTism</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
     <style>
-        /* === FOLHA DE ESTILOS CSS === */
-        /*
-            A estilização define a paleta de cores (tema escuro), a tipografia,
-            o layout dos componentes (Flexbox e Grid), e as animações para
-            interatividade e feedback visual (ex: brilho da borda, spinner).
-            O uso de variáveis CSS (:root) permite a reconfiguração rápida do tema.
-        */
         :root {
-            --cor-fundo: #0a192f; --cor-container: #172a45; --cor-primaria: #64ffda;
-            --cor-alerta: #ff6b6b; --cor-texto-principal: #ccd6f6; --cor-texto-secundario: #8892b0;
+            --cor-fundo: #0a192f;
+            --cor-container: #172a45;
+            --cor-primaria: #64ffda;
+            --cor-alerta: #ff6b6b;
+            --cor-texto-principal: #ccd6f6;
+            --cor-texto-secundario: #8892b0;
             --cor-borda: #233554;
         }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--cor-fundo); color: var(--cor-texto-principal); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .container { background-color: var(--cor-container); padding: 30px 40px; border-radius: 16px; border: 1px solid var(--cor-borda); width: 100%; max-width: 420px; text-align: center; transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out; }
-        .container.risco-alto { border-color: var(--cor-alerta); box-shadow: 0 0 25px rgba(255, 107, 107, 0.5); }
-        .container.risco-baixo { border-color: var(--cor-primaria); box-shadow: 0 0 25px rgba(100, 255, 218, 0.4); }
-        #chart-container-main { margin-bottom: 25px; }
-        #mini-charts-container { display: flex; justify-content: space-around; margin-bottom: 25px; }
-        .mini-chart { width: 30%; }
-        .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .input-group { background-color: var(--cor-fundo); border-radius: 10px; padding: 10px; border: 1px solid var(--cor-borda); text-align: left; }
-        .input-header { display: flex; align-items: center; gap: 8px; color: var(--cor-texto-secundario); font-size: 0.7em; margin-bottom: 2px; text-transform: uppercase; }
-        .input-icon { width: 14px; height: 14px; fill: currentColor; }
-        input { width: 100%; background: transparent; border: none; color: var(--cor-texto-principal); font-size: 1.2em; font-weight: 600; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto-principal);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--cor-container);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--cor-borda);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .header p {
+            color: var(--cor-texto-secundario);
+            margin-top: 8px;
+            margin-bottom: 30px;
+        }
+
+        /* ESTILO DO GRÁFICO DE PULSO (EKG) */
+        .ekg-line {
+            width: 100%;
+            height: auto;
+            stroke: var(--cor-primaria);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-ekg 2s ease-out forwards;
+            margin-bottom: 30px;
+        }
+
+        @keyframes draw-ekg { to { stroke-dashoffset: 0; } }
+
+        /* NOVO ESTILO DOS INPUTS (AS "BARRINHAS") */
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--cor-borda);
+            padding-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--cor-primaria);
+        }
+
+        .input-icon {
+            color: var(--cor-texto-secundario);
+            margin-right: 15px;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--cor-texto-principal);
+            font-size: 1.8em;
+            font-weight: 500;
+            text-align: right;
+        }
         input:focus { outline: none; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
-        button[type="submit"] { width: 100%; padding: 15px; background-color: var(--cor-primaria); color: var(--cor-fundo); border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+
+        /* ESTILOS DO BOTÃO, RESULTADO E FEEDBACK CONTINUAM OS MESMOS */
+        button[type="submit"] { width: 100%; padding: 15px; background-color: var(--cor-primaria); color: var(--cor-fundo); border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 10px; }
         button[type="submit"]:hover { box-shadow: 0 0 15px var(--cor-primaria); }
         button:disabled { background: #5a6268; cursor: not-allowed; }
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: var(--cor-fundo); border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         #resultado { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; font-weight: 500;}
         .risco-sim { background-color: rgba(255, 107, 107, 0.1); color: var(--cor-alerta); border: 1px solid var(--cor-alerta); }
         .risco-nao { background-color: rgba(100, 255, 218, 0.1); color: var(--cor-primaria); border: 1px solid var(--cor-primaria); }
@@ -52,137 +118,93 @@
     </style>
 </head>
 <body>
-    <div class="container" id="main-container">
 
-        <div id="chart-container-main">
-            <div id="chart-ruido"></div>
-        </div>
-
-        <div id="mini-charts-container">
-            <div class="mini-chart" id="chart-coracao"></div>
-            <div class="mini-chart" id="chart-temp-corp"></div>
-            <div class="mini-chart" id="chart-temp-amb"></div>
+    <div class="container">
+        <div class="header">
+            <h1>IoTism</h1>
+            <p>Insira os dados sensoriais para análise de risco.</p>
+            <svg class="ekg-line" viewBox="0 0 800 100" preserveAspectRatio="xMidYMid meet">
+                <path d="M0 50 L100 50 L120 30 L140 70 L160 45 L180 55 L200 50 L350 50 L370 20 L390 80 L410 35 L430 60 L450 50 L600 50 L620 40 L640 60 L660 50 L800 50"></path>
+            </svg>
         </div>
 
         <form id="sensorForm">
-            <div class="inputs-grid">
-                <div class="input-group"><div class="input-header"><span class="input-icon"></span><span>Heart Rate</span></div><input type="number" id="batimento" value="80" required></div>
-                <div class="input-group"><div class="input-header"><span class="input-icon"></span><span>Body Temp</span></div><input type="number" step="0.1" id="temp_corp" value="36.5" required></div>
-                <div class="input-group"><div class="input-header"><span class="input-icon"></span><span>Amb. Temp</span></div><input type="number" step="0.1" id="temp_amb" value="22.5" required></div>
-                <div class="input-group"><div class="input-header"><span class="input-icon"></span><span>Sound Level</span></div><input type="number" id="ruido" value="55" required></div>
-                <div class="input-group"><div class="input-header"><span class="input-icon"></span><span>Luminosity</span></div><input type="number" id="luz" value="300" required></div>
+            <div class="input-group">
+                <span class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg></span>
+                <input type="number" id="batimento" value="80" required>
             </div>
-            <button id="submit-button" type="submit">Verificar Risco</button>
+            <div class="input-group">
+                 <span class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V9h-5V3.5A2.5 2.5 0 0 1 8 1zm3.5 8.5a.5.5 0 0 1-1 0V3.5a1.5 1.5 0 1 0-3 0V9a.5.5 0 0 1-1 0V3.5a2.5 2.5 0 0 1 5 0v6.5z"/><path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm13 2v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1z"/></svg></span>
+                <input type="number" step="0.1" id="temp_corp" value="36.5" required>
+            </div>
+            <div class="input-group">
+                 <span class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.5 2.675a2.5 2.5 0 0 1 0 4.65V11h-1V7.325a2.5 2.5 0 1 1 0-4.65zM8.5 4a.5.5 0 0 0-1 0v9.5a.5.5 0 0 0 1 0V4z"/><path d="M4.5 9a.5.5 0 0 0-1 0v2.5a.5.5 0 0 0 1 0V9z"/></svg></span>
+                <input type="number" step="0.1" id="temp_amb" value="22.5" required>
+            </div>
+            <div class="input-group">
+                 <span class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707zM8.707 11.182A4.486 4.486 0 0 0 10.025 8 4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/></svg></span>
+                <input type="number" id="ruido" value="55" required>
+            </div>
+            <div class="input-group">
+                <span class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/></svg></span>
+                <input type="number" id="luz" value="300" required>
+            </div>
+            <button type="submit">
+                <span class="button-text">Verificar Risco</span>
+                <div class="spinner"></div>
+            </button>
         </form>
 
         <div id="resultado"></div>
-        <div id="feedback-section">
-            <div class="feedback-buttons"></div>
-            <p id="feedback-confirm" style="display:none;"></p>
-        </div>
+        <div id="feedback-section"><div class="feedback-buttons"></div><p id="feedback-confirm" style="display:none;"></p></div>
     </div>
 
     <script>
-        // === INÍCIO DO SCRIPT DE LÓGICA DO FRONTEND ===
-
-        // --- Bloco 1: Fábrica de Componentes Gráficos ---
-        // Função reutilizável (factory) para gerar instâncias de gráficos ApexCharts com uma configuração padrão.
-        // Isso otimiza a criação de múltiplos medidores e centraliza a estilização base.
-        function criarMedidor(elementId, options) {
-            const defaultOptions = {
-                chart: { type: 'radialBar', sparkline: { enabled: true } },
-                plotOptions: {
-                    radialBar: {
-                        hollow: { size: '65%' },
-                        track: { background: 'var(--cor-borda)' },
-                        dataLabels: {
-                            name: { show: true, color: 'var(--cor-texto-secundario)', offsetY: 15, fontSize: '13px' },
-                            value: { show: true, color: 'var(--cor-texto-principal)', offsetY: -15, fontSize: '20px', fontWeight: 600 }
-                        }
-                    }
-                },
-                fill: { colors: ['var(--cor-primaria)'] },
-                stroke: { lineCap: 'round' },
-                series: [0], // Valor inicial padrão
-            };
-            const finalOptions = { ...defaultOptions, ...options }; // Mescla opções padrão com as específicas
-            finalOptions.plotOptions.radialBar.dataLabels.name = {...defaultOptions.plotOptions.radialBar.dataLabels.name, ...options.plotOptions?.radialBar?.dataLabels?.name};
-            finalOptions.plotOptions.radialBar.dataLabels.value = {...defaultOptions.plotOptions.radialBar.dataLabels.value, ...options.plotOptions?.radialBar?.dataLabels?.value};
-
-            const chart = new ApexCharts(document.querySelector(elementId), finalOptions);
-            chart.render();
-            return chart;
-        }
-
-        // --- Bloco 2: Inicialização dos Componentes Visuais ---
-        // Instanciação de todos os gráficos necessários para o dashboard.
-        const medidorRuido = criarMedidor('#chart-ruido', { chart: { height: 280 }, plotOptions: { radialBar: { dataLabels: { name: { formatter: () => "Sound Level" }, value: { formatter: (val) => val + " dB" } } } }, series: [55] });
-        const medidorCoracao = criarMedidor('#chart-coracao', { plotOptions: { radialBar: { dataLabels: { name: { formatter: () => "Heart Rate" }, value: { formatter: (val) => Math.round(val) + " bpm" } } } }, series: [80] });
-        const medidorTempCorp = criarMedidor('#chart-temp-corp', { plotOptions: { radialBar: { startAngle: -90, endAngle: 90, dataLabels: { name: { formatter: () => "Body Temp" }, value: { formatter: (val) => val.toFixed(1) + "°C" } } } }, series: [36.5] });
-        const medidorTempAmb = criarMedidor('#chart-temp-amb', { plotOptions: { radialBar: { startAngle: -90, endAngle: 90, dataLabels: { name: { formatter: () => "Amb. Temp" }, value: { formatter: (val) => val.toFixed(1) + "°C" } } } }, series: [22.5] });
-
-        // --- Bloco 3: Sincronização em Tempo Real (Input -> Gráfico) ---
-        // Adiciona 'event listeners' para o evento 'input'. Isso garante que qualquer alteração
-        // nos campos de texto atualize o gráfico correspondente instantaneamente.
-        document.getElementById('ruido').addEventListener('input', e => medidorRuido.updateSeries([parseFloat(e.target.value) || 0]));
-        document.getElementById('batimento').addEventListener('input', e => medidorCoracao.updateSeries([parseFloat(e.target.value) || 0]));
-        document.getElementById('temp_corp').addEventListener('input', e => medidorTempCorp.updateSeries([parseFloat(e.target.value) || 0]));
-        document.getElementById('temp_amb').addEventListener('input', e => medidorTempAmb.updateSeries([parseFloat(e.target.value) || 0]));
-
-        // --- Bloco 4: Lógica Principal de Previsão e Feedback ---
-        // Cache dos elementos do DOM para manipulação de eventos.
+        // O JavaScript foi simplificado, pois não precisa mais controlar os gráficos.
         const form = document.getElementById('sensorForm');
-        const container = document.getElementById('main-container');
         const resultadoDiv = document.getElementById('resultado');
-        const submitButton = document.getElementById('submit-button');
+        const submitButton = form.querySelector('button');
+        const buttonText = submitButton.querySelector('.button-text');
+        const spinner = submitButton.querySelector('.spinner');
         const feedbackSection = document.getElementById('feedback-section');
         const feedbackButtonsDiv = feedbackSection.querySelector('.feedback-buttons');
         const feedbackConfirmP = document.getElementById('feedback-confirm');
-        let currentPredictionId = null; // Armazena o ID da última previsão para o feedback
+        let currentPredictionId = null;
 
-        // Listener para o evento de submissão do formulário.
         form.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Previne o recarregamento padrão da página.
-
-            // Gerenciamento de estado da UI: Inicia o estado de carregamento.
-            submitButton.disabled = true; submitButton.innerText = 'Analisando...';
-            resultadoDiv.style.display = 'none'; feedbackSection.style.display = 'none';
-            feedbackConfirmP.style.display = 'none'; container.classList.remove('risco-alto', 'risco-baixo');
-
-            // Coleta e formata os dados do formulário para envio.
+            event.preventDefault();
+            submitButton.disabled = true; buttonText.style.display = 'none'; spinner.style.display = 'block';
+            resultadoDiv.style.display = 'none'; feedbackSection.style.display = 'none'; feedbackConfirmP.style.display = 'none';
             const dadosParaEnviar = {batimento_cardiaco:parseInt(document.getElementById('batimento').value),temperatura_corporal:parseFloat(document.getElementById('temp_corp').value),temperatura_ambiente:parseFloat(document.getElementById('temp_amb').value),nivel_ruido_db:parseInt(document.getElementById('ruido').value),luminosidade_lux:parseInt(document.getElementById('luz').value)};
 
             try {
-                // Executa a chamada assíncrona para a API de previsão.
                 const response = await fetch('http://127.0.0.1:8000/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dadosParaEnviar) });
+                if (!response.ok) throw new Error(`Erro na API`);
                 const previsao = await response.json();
 
-                // Armazena o ID da previsão para um possível feedback.
                 currentPredictionId = previsao.prediction_id;
 
-                // Atualiza a UI com base na resposta da API.
-                if (previsao.risco_detectado === "Sim") {
-                    container.classList.add('risco-alto');
-                    resultadoDiv.innerHTML = `ALERTA: Risco de sobrecarga detectado!`;
-                } else {
-                    container.classList.add('risco-baixo');
-                    resultadoDiv.innerHTML = `Ambiente Seguro: Baixo risco de sobrecarga.`;
-                }
                 resultadoDiv.style.display = 'block';
-                mostrarBotoesFeedback(previsao.risco_detectado === "Sim" ? 'crise_prevista' : 'sem_crise');
-
+                if (previsao.risco_detectado === "Sim") {
+                    resultadoDiv.className = 'risco-sim';
+                    resultadoDiv.innerHTML = `<strong>ALERTA:</strong> Risco de sobrecarga detectado! (Confiança: ${previsao.probabilidade_de_crise}%)`;
+                    mostrarBotoesFeedback('crise_prevista');
+                } else {
+                    resultadoDiv.className = 'risco-nao';
+                    resultadoDiv.innerHTML = `<strong>Ambiente Seguro:</strong> Baixo risco de sobrecarga.`;
+                    mostrarBotoesFeedback('sem_crise');
+                }
             } catch (error) {
-                // Tratamento de exceção para falhas de rede ou da API.
-                resultadoDiv.style.display = 'block'; resultadoDiv.className = 'risco-sim';
+                resultadoDiv.style.display = 'block';
+                resultadoDiv.className = 'risco-sim';
                 resultadoDiv.innerHTML = "Erro ao conectar com a API.";
             } finally {
-                // Gerenciamento de estado da UI: Restaura o estado padrão do botão.
-                submitButton.disabled = false; submitButton.innerText = 'Verificar Risco';
+                submitButton.disabled = false;
+                buttonText.style.display = 'inline';
+                spinner.style.display = 'none';
             }
         });
 
-        // --- Bloco 5: Funções de Lógica de Feedback ---
-        // Exibe os botões de feedback apropriados com base no contexto da previsão.
         function mostrarBotoesFeedback(contexto) {
             feedbackButtonsDiv.innerHTML = '';
             if (contexto === 'crise_prevista') {
@@ -192,17 +214,13 @@
             }
             feedbackSection.style.display = 'block';
         }
-
-        // Envia o feedback do usuário para o endpoint /feedback da API.
         async function sendFeedback(tipo) {
             if (!currentPredictionId) return;
             const feedbackData = { prediction_id: currentPredictionId, tipo_feedback: tipo };
             try {
                 await fetch('http://127.0.0.1:8000/feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(feedbackData) });
-                feedbackButtonsDiv.innerHTML = '<p style="color: var(--cor-primaria);">Obrigado!</p>';
-            } catch (error) {
-                console.error("Erro ao enviar feedback:", error);
-            }
+                feedbackButtonsDiv.innerHTML = '<p style="color: var(--cor-primaria);">Obrigado pelo seu feedback!</p>';
+            } catch (error) { console.error("Erro ao enviar feedback:", error); }
         }
     </script>
 </body>

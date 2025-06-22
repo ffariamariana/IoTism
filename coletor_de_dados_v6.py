@@ -1,6 +1,7 @@
 import pymongo
 import random
 from datetime import datetime, timedelta
+from pymongo import MongoClient
 
 # --- Configurações Geraais ---
 MONGO_CONNECTION_STRING = "mongodb://localhost:27017/"

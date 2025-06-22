@@ -7,22 +7,23 @@ import uuid
 from pymongo import MongoClient
 from datetime import datetime
 
-# --- Inicialização da API e Configuração do CORS ---
+# Inicialização da API com o título final
 app = FastAPI(
-    title="API IoTism",
-    description="API para prever o risco de sobrecarga sensorial.",
+    title="IoTism API",
+    description="API para prever o risco de sobrecarga sensorial com base em dados de sensores.",
     version="1.0.0"
 )
 
+# Configuração do CORS para permitir a comunicação com o front-end
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite todas as origens para desenvolvimento
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Conexão com DB e Carregamento do Modelo ---
+# Conexão com DB e Carregamento do Modelo
 MONGO_CONNECTION_STRING = "mongodb://localhost:27017/"
 DATABASE_NAME = "teasense_db"
 MODEL_FILENAME = 'teasense_model.pkl'
@@ -32,13 +33,13 @@ try:
     mongo_client = MongoClient(MONGO_CONNECTION_STRING)
     db = mongo_client[DATABASE_NAME]
     feedback_collection = db["feedback_data"]
-    print("INFO:     Modelo e conexão com MongoDB carregados.")
+    print("INFO:     Modelo e conexão com MongoDB carregados com sucesso.")
 except Exception as e:
-    print(f"ERRO:     Falha na inicialização. Modelo ou DB não encontrado. Detalhes: {e}")
+    print(f"ERRO:     Falha na inicialização. Detalhes: {e}")
     modelo = None
 
 
-# --- Modelos de Dados (Entrada e Saída) ---
+# Modelos de Dados Pydantic para validação de entrada
 class SensorData(BaseModel):
     batimento_cardiaco: int
     temperatura_corporal: float
@@ -52,7 +53,7 @@ class FeedbackData(BaseModel):
     tipo_feedback: str
 
 
-# --- Endpoints da API ---
+# Endpoints da API
 @app.get("/")
 def read_root():
     return {"status": "API do IoTism está no ar!"}
@@ -60,9 +61,9 @@ def read_root():
 
 @app.post("/predict")
 async def predict(data: SensorData):
-    """Recebe dados dos sensores e retorna uma previsão de risco."""
+    """Recebe dados dos sensores e retorna uma previsão de risco com um ID único."""
     if modelo is None:
-        return {"erro": "Modelo não carregado."}
+        return {"erro": "Modelo não carregado. Verifique o terminal para erros na inicialização."}
 
     dados_df = pd.DataFrame([data.dict()])
 
@@ -82,7 +83,7 @@ async def predict(data: SensorData):
 
 @app.post("/feedback")
 async def receive_feedback(data: FeedbackData):
-    """Recebe e armazena o feedback do usuário."""
+    """Recebe e armazena o feedback do usuário no banco de dados."""
     try:
         documento_feedback = {
             "prediction_id": data.prediction_id,
@@ -90,6 +91,6 @@ async def receive_feedback(data: FeedbackData):
             "timestamp_feedback": datetime.now()
         }
         feedback_collection.insert_one(documento_feedback)
-        return {"status": "sucesso", "mensagem": "Feedback recebido!"}
+        return {"status": "sucesso", "mensagem": "Feedback recebido com sucesso!"}
     except Exception as e:
         return {"status": "erro", "mensagem": f"Falha ao salvar o feedback: {e}"}
